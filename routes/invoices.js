@@ -39,24 +39,37 @@ router.post("/", async function (req, res, next) {
   }
 });
 
-router.patch("/:id", async function (req, res, next) {
+router.put("/:id", async function (req, res, next) {
   try {
-    const results = await db.query(
-      "UPDATE invoices SET comp_Code=$1, amt=$2, paid=$3, paid_date=$4 WHERE id=$5 RETURNING comp_Code, amt, paid, paid_date",
-      [
-        req.body.comp_Code,
-        req.body.amt,
-        req.body.paid,
-        req.body.paid_date,
-        req.params.id,
-      ]
+    let { amt, paid } = req.body;
+    let paidDate = null;
+
+    const currResult = await db.query(
+      `SELECT paid
+       FROM invoices
+       WHERE id = $1`,
+      [req.params.id]
     );
 
-    if (results.rows.length === 0) {
+    if (currResult.rows.length === 0) {
       throw new ExpressError(`Invoice ${req.params.id} cannot be found`, 404);
     }
-    
-    
+
+    const currPaidDate = currResult.rows[0].paid_date;
+
+    if (paid && !currPaidDate) {
+      paid_date = new Date();
+    } else if (!paid) {
+      paidDate === null;
+    } else {
+      paidDate = currPaidDate;
+    }
+
+    const results = await db.query(
+      "UPDATE invoices SET comp_Code=$1, amt=$2, paid=$3, paid_date=$4 WHERE id=$5 RETURNING comp_Code, amt, paid, paid_date",
+      [req.body.comp_Code, amt, req.body.paid, paid_date, req.params.id]
+    );
+
     return res.json({ invoice: results.rows[0] });
   } catch (e) {
     return next(e);
@@ -77,6 +90,5 @@ router.delete("/:id", async function (req, res, next) {
     return next(e);
   }
 });
-
 
 module.exports = router;
