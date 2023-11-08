@@ -1,5 +1,7 @@
 process.env.NODE_ENV = "test";
 
+const slugify = require("slugify");
+
 const request = require("supertest");
 
 const app = require("../app");

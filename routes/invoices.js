@@ -55,6 +55,8 @@ router.patch("/:id", async function (req, res, next) {
     if (results.rows.length === 0) {
       throw new ExpressError(`Invoice ${req.params.id} cannot be found`, 404);
     }
+    
+    
     return res.json({ invoice: results.rows[0] });
   } catch (e) {
     return next(e);

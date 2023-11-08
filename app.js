@@ -4,6 +4,9 @@ require("dotenv").config();
 const express = require("express");
 
 const app = express();
+
+const slugify = require("slugify");
+
 const ExpressError = require("./expressError");
 
 const companiesRoutes = require("./routes/companies");
