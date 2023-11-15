@@ -12,4 +12,18 @@ router.get("/", async function (req, res, next) {
   }
 });
 
+router.post("/", async function (req, res, next) {
+  try {
+    const result = await db.query(
+      "INSERT INTO industries (code, industry) VALUES ($1, $2) RETURNING code, industry",
+      [req.body.code, req.body.industry]
+    );
+    return res.json({ industry: result.rows[0] });
+  } catch (e) {
+    return next(e);
+  }
+});
+
+
+
 module.exports = router;
