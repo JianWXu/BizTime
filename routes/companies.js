@@ -16,9 +16,17 @@ router.get("/", async function (req, res, next) {
 router.get("/:code", async function (req, res, next) {
   try {
     const result = await db.query(
-      "SELECT code, name, description FROM companies WHERE code = $1",
+      `SELECT c.code, c.name, c.description, i.industry
+        FROM companies AS c
+          LEFT JOIN sector
+            ON c.code = comp_code
+          LEFT JOIN industries AS i ON i.code = ind_code
+        WHERE c.code = $1`,
       [req.params.code]
     );
+
+    let { code, name, description } = result.rows[0];
+    let industries = result.rows.map((r) => r.industry);
 
     if (result.rows.length === 0) {
       let notFoundError = new Error(
@@ -27,7 +35,8 @@ router.get("/:code", async function (req, res, next) {
       notFoundError.status = 404;
       throw notFoundError;
     }
-    return res.json({ company: result.rows[0] });
+
+    return res.json({ code, name, description, industries });
   } catch (e) {
     return next(e);
   }
